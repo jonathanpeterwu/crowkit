@@ -1,0 +1,26 @@
+{
+  "name": "llm-wiki-setup",
+  "version": "1.0.0",
+  "description": "Set up a Karpathy-style LLM wiki for Claude Code with iCloud sync",
+  "bin": {
+    "llm-wiki-setup": "./bin/setup.mjs"
+  },
+  "type": "module",
+  "keywords": [
+    "llm",
+    "wiki",
+    "karpathy",
+    "claude-code",
+    "knowledge-base",
+    "icloud"
+  ],
+  "author": "Jonathan Wu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonathanpeterwu/llm-wiki-setup"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
