@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>crowkit — Portable LLM Wiki + Claude Code Harness</title>
-  <meta name="description" content="One command sets up a Karpathy-style knowledge base with iCloud sync, Keychain secrets, and MCP server config that travels across machines.">
+  <title>crowkit — Portable Second Brain + Claude Code Harness</title>
+  <meta name="description" content="One command sets up a Karpathy-style LLM wiki with cross-platform sync, native secret storage, and MCP config that travels across machines.">
   <style>
     :root {
       --bg: #0a0a0a;
@@ -282,7 +282,7 @@
     <section class="hero">
       <span class="hero-icon">&#x1F426;&#x200D;&#x2B1B;</span>
       <h1>crowkit</h1>
-      <p class="tagline">Portable LLM wiki + Claude Code harness that travels across machines.</p>
+      <p class="tagline">Portable second brain + Claude Code harness that travels across machines.</p>
       <div class="install-box" onclick="navigator.clipboard.writeText('npx crowkit')">
         <span class="dollar">$</span>
         <span class="cmd">npx crowkit</span>
@@ -300,20 +300,20 @@
         <p>Three-layer knowledge base: raw sources you drop in, wiki pages the LLM maintains, and generated outputs.</p>
       </div>
       <div class="feature">
-        <h3>&#x2601;&#xFE0F; iCloud Sync</h3>
-        <p>CLAUDE.md and slash commands sync via iCloud Drive. Git handles wiki content. Zero manual copying.</p>
+        <h3>&#x2601;&#xFE0F; Cross-Platform Sync</h3>
+        <p>iCloud on Mac, local + git everywhere else. Skills, CLAUDE.md, and config travel with you.</p>
       </div>
       <div class="feature">
-        <h3>&#x1F510; Keychain Secrets</h3>
-        <p>MCP server API keys stored in macOS Keychain. Syncs via iCloud Keychain. Never in plain text files.</p>
+        <h3>&#x1F510; Native Secret Storage</h3>
+        <p>API keys in macOS Keychain, GNOME Keyring, or Windows Credential Manager. Never in plain text.</p>
       </div>
       <div class="feature">
-        <h3>&#x1F916; MCP Servers</h3>
-        <p>Interactive setup for MCP servers. Adds them to Claude Code config with secure credential handling.</p>
+        <h3>&#x1F916; Skills: /next /ingest /lint</h3>
+        <p>Built-in Claude Code skills for wiki operations. Ingest sources, health-check pages, review what's next.</p>
       </div>
       <div class="feature">
         <h3>&#x26A1; One Command</h3>
-        <p>Run <code>npx crowkit</code> on a new machine. It detects existing state and only fills in what's missing.</p>
+        <p>Run <code>npx crowkit</code> on any machine. Auth preflight, wiki setup, skills, secrets — all handled.</p>
       </div>
     </section>
 
@@ -342,23 +342,23 @@
     </section>
 
     <section class="sync">
-      <h2>Sync Across Machines</h2>
+      <h2>Works Everywhere</h2>
       <table>
         <thead>
-          <tr><th>Thing</th><th>First Mac</th><th>Second Mac</th></tr>
+          <tr><th>Feature</th><th>macOS</th><th>Linux / WSL</th><th>Windows</th></tr>
         </thead>
         <tbody>
-          <tr><td>Wiki content</td><td><code>git push</code></td><td><code>git clone</code></td></tr>
-          <tr><td>CLAUDE.md + commands</td><td>auto (iCloud)</td><td><code>npx crowkit</code> to symlink</td></tr>
-          <tr><td>API keys</td><td>auto (Keychain)</td><td>auto (iCloud Keychain)</td></tr>
-          <tr><td>MCP servers</td><td>crowkit adds them</td><td><code>npx crowkit</code></td></tr>
+          <tr><td>Wiki + skills</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Config sync</td><td>iCloud</td><td>local</td><td>local</td></tr>
+          <tr><td>Secret storage</td><td>Keychain</td><td>GNOME Keyring</td><td>Credential Manager</td></tr>
+          <tr><td>Auto-capture</td><td>SessionEnd hook</td><td>SessionEnd hook</td><td>SessionEnd hook</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="cta">
       <h2>Get started in 30 seconds</h2>
-      <p>Works with Claude Code on any Mac. Linux support for wiki + local config.</p>
+      <p>Works with Claude Code on macOS, Linux, WSL, and Windows.</p>
       <a href="https://github.com/jonathanpeterwu/crowkit" class="btn">GitHub</a>
       <a href="https://www.npmjs.com/package/crowkit" class="btn btn-ghost">npm</a>
     </section>
