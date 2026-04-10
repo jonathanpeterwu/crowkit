@@ -67,6 +67,42 @@ iCloud syncs the Claude config automatically between Macs. The setup tool detect
 - Claude Code
 - macOS (for iCloud sync — works without it, config is local-only)
 
+## Publishing to npm
+
+First-time setup:
+
+```bash
+# Log in to npm (opens browser)
+npm login
+
+# Verify you're logged in
+npm whoami
+```
+
+Publish:
+
+```bash
+cd ~/Dev/llm-wiki-setup
+npm publish
+```
+
+To publish an update, bump the version first:
+
+```bash
+# patch (1.0.0 → 1.0.1), minor (1.0.0 → 1.1.0), or major (1.0.0 → 2.0.0)
+npm version patch
+npm publish
+git push --follow-tags
+```
+
+## Contributing
+
+1. Fork the repo
+2. Create a branch (`git checkout -b my-feature`)
+3. Commit changes (`git commit -m "Add feature"`)
+4. Push (`git push origin my-feature`)
+5. Open a PR
+
 ## License
 
 MIT
