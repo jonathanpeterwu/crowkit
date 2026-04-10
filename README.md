@@ -1,6 +1,6 @@
 # crowkit
 
-Portable LLM wiki + Claude Code harness. One command sets up a [Karpathy-style knowledge base](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) with iCloud sync, Keychain secrets, and MCP server config that travels across machines.
+Portable second brain + Claude Code harness. One command sets up a [Karpathy-style LLM wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) with cross-platform sync, native secret storage, and MCP server config that travels across machines.
 
 > Crows cache food in hundreds of locations and remember every spot. Crowkit does the same with your knowledge.
 
@@ -144,11 +144,23 @@ What auto-syncs vs. what you re-run:
 | MCP server config | crowkit adds them | re-run `npx crowkit` |
 | GitHub / npm auth | `gh auth login` / `npm login` | `gh auth login` / `npm login` |
 
-## Requirements
+## Platform Support
+
+| Feature | macOS | Linux | WSL | Windows |
+|---------|-------|-------|-----|---------|
+| Wiki (git) | Yes | Yes | Yes | Yes |
+| Skills | Yes | Yes | Yes | Yes |
+| CLAUDE.md | Yes | Yes | Yes | Yes |
+| Config sync | iCloud | local (v1.0: S3) | local (v1.0: S3) | local (v1.0: S3) |
+| Secret storage | Keychain | GNOME Keyring (`secret-tool`) | GNOME Keyring | Credential Manager (`cmdkey`) |
+| GitButler | `brew install --cask gitbutler` | AppImage | AppImage | [gitbutler.com](https://gitbutler.com) |
+| Auto-capture hook | `.sh` | `.sh` | `.sh` | `.sh` (Git Bash) |
+
+### Requirements
 
 - Node.js 18+
 - Claude Code
-- macOS (for iCloud sync + Keychain — works without, config is local-only)
+- git
 
 ## Publishing
 
@@ -169,9 +181,12 @@ npm version patch && npm publish && git push --follow-tags
 - [x] Auto-capture SessionEnd hook
 - [x] GitButler optional onboarding
 
-### v0.3 — Cross-platform
-- [ ] Linux support for config sync (dotfiles repo fallback)
-- [ ] WSL detection and path handling
+### v0.3 — Cross-platform (done)
+- [x] Linux support with GNOME Keyring (`secret-tool`) for secrets
+- [x] Windows support with Credential Manager (`cmdkey`)
+- [x] WSL detection
+- [x] Symlink fallback to copy on Windows
+- [ ] Linux config sync via dotfiles repo fallback
 
 ### v1.0 — Crowkit Cloud (paid)
 Zero-knowledge encrypted sync that works on any OS — not just Mac.

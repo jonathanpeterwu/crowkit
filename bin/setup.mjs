@@ -7,10 +7,18 @@ import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 import readline from "readline";
 
+import { copyFileSync } from "fs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOME = homedir();
 const TEMPLATES = join(__dirname, "..", "templates");
-const IS_MAC = platform() === "darwin";
+const PLATFORM = platform();
+const IS_MAC = PLATFORM === "darwin";
+const IS_WIN = PLATFORM === "win32";
+const IS_LINUX = PLATFORM === "linux";
+const IS_WSL = IS_LINUX && (() => {
+  try { return readFileSync("/proc/version", "utf-8").toLowerCase().includes("microsoft"); } catch { return false; }
+})();
 
 const ICLOUD_BASE = join(
   HOME,
@@ -51,7 +59,13 @@ function safeSymlink(target, linkPath) {
   if (existsSync(linkPath)) {
     unlinkSync(linkPath);
   }
-  symlinkSync(target, linkPath);
+  try {
+    symlinkSync(target, linkPath);
+  } catch {
+    // Windows without developer mode, or permission issues — fall back to copy
+    warn(`Symlink failed, copying instead: ${linkPath}`);
+    copyFileSync(target, linkPath);
+  }
 }
 
 function template(name) {
@@ -74,30 +88,51 @@ function checkTool(name, testCmd, loginCmd, loginNote) {
   return { name, ok: false, loginCmd, loginNote };
 }
 
-// Store a secret in macOS Keychain (falls back to env var instruction)
-function keychainSet(service, account, password) {
-  if (!IS_MAC) return false;
+// Store a secret in platform-native credential store
+function secretSet(service, account, password) {
   try {
-    execSync(
-      `security add-generic-password -U -s "${service}" -a "${account}" -w "${password}"`,
-      { stdio: "pipe" }
-    );
-    return true;
-  } catch {
-    return false;
-  }
+    if (IS_MAC) {
+      execSync(
+        `security add-generic-password -U -s "${service}" -a "${account}" -w "${password}"`,
+        { stdio: "pipe" }
+      );
+      return "keychain";
+    }
+    if (IS_LINUX && cmd("which secret-tool")) {
+      execSync(
+        `echo -n "${password}" | secret-tool store --label="${service}:${account}" service "${service}" account "${account}"`,
+        { stdio: "pipe" }
+      );
+      return "gnome-keyring";
+    }
+    if (IS_WIN) {
+      execSync(
+        `cmdkey /generic:${service}:${account} /user:${account} /pass:${password}`,
+        { stdio: "pipe" }
+      );
+      return "credential-manager";
+    }
+  } catch { /* fall through */ }
+  return false;
 }
 
-function keychainGet(service, account) {
-  if (!IS_MAC) return null;
+function secretGet(service, account) {
   try {
-    return execSync(
-      `security find-generic-password -s "${service}" -a "${account}" -w`,
-      { encoding: "utf-8", stdio: "pipe" }
-    ).trim();
-  } catch {
-    return null;
-  }
+    if (IS_MAC) {
+      return execSync(
+        `security find-generic-password -s "${service}" -a "${account}" -w`,
+        { encoding: "utf-8", stdio: "pipe" }
+      ).trim();
+    }
+    if (IS_LINUX && cmd("which secret-tool")) {
+      return execSync(
+        `secret-tool lookup service "${service}" account "${account}"`,
+        { encoding: "utf-8", stdio: "pipe" }
+      ).trim();
+    }
+    // Windows credential manager doesn't have a simple CLI read — skip
+  } catch { /* not found */ }
+  return null;
 }
 
 async function runAuthChecks() {
@@ -147,7 +182,8 @@ async function runAuthChecks() {
 
 async function setupMcpKeys() {
   heading("MCP Server API Keys");
-  console.log("  API keys are stored in macOS Keychain (or exported as env vars on Linux).\n");
+  const storeNames = { darwin: "macOS Keychain", linux: "GNOME Keyring (secret-tool)", win32: "Windows Credential Manager" };
+  console.log(`  API keys stored in: ${storeNames[PLATFORM] || "env vars"}\n`);
 
   const servers = [];
   let addMore = true;
@@ -173,22 +209,18 @@ async function setupMcpKeys() {
     let envVar = null;
     if (needsKey.toLowerCase() === "y") {
       const keyName = await ask(`  Env var name (e.g., RESEND_API_KEY)`);
-      const existingKey = keychainGet("crowkit-mcp", keyName);
+      const existingKey = secretGet("crowkit-mcp", keyName);
 
       if (existingKey) {
         log(`  Found existing key for ${keyName} in Keychain`);
         envVar = { name: keyName, value: existingKey };
       } else {
         const keyValue = await ask(`  API key value (stored in Keychain, not in files)`);
-        if (IS_MAC) {
-          const stored = keychainSet("crowkit-mcp", keyName, keyValue);
-          if (stored) {
-            log(`  Stored ${keyName} in macOS Keychain`);
-          } else {
-            warn(`  Could not store in Keychain. Export manually: export ${keyName}="${keyValue}"`);
-          }
+        const stored = secretSet("crowkit-mcp", keyName, keyValue);
+        if (stored) {
+          log(`  Stored ${keyName} in ${typeof stored === "string" ? stored : "credential store"}`);
         } else {
-          warn(`  No Keychain on this OS. Add to your shell profile: export ${keyName}="***"`);
+          warn(`  No native credential store found. Add to your shell profile: export ${keyName}="***"`);
         }
         envVar = { name: keyName, value: keyValue };
       }
@@ -246,8 +278,14 @@ async function main() {
     }
   } else if (IS_MAC) {
     warn("iCloud Drive not found. Config will be local-only.");
+  } else if (IS_WSL) {
+    warn("WSL detected. Config will be local-only. Use 'crowkit sync' (v1.0) for cross-machine sync.");
+  } else if (IS_LINUX) {
+    warn("Linux detected. Config will be local-only. Use 'crowkit sync' (v1.0) for cross-machine sync.");
+  } else if (IS_WIN) {
+    warn("Windows detected. Config will be local-only. Use 'crowkit sync' (v1.0) for cross-machine sync.");
   } else {
-    warn("Not macOS. Config will be local-only (copy manually to other machines).");
+    warn("Config will be local-only.");
   }
 
   // ── Step 3: Create wiki directory structure ──
@@ -407,7 +445,7 @@ async function main() {
   Wiki:       ${wikiPath}
   CLAUDE.md:  ${join(HOME, "CLAUDE.md")}${syncMethod === "icloud" ? " (→ iCloud)" : ""}
   Skills:     /next, /ingest, /lint${syncMethod === "icloud" ? " (→ iCloud)" : ""}
-  API keys:   ${IS_MAC ? "macOS Keychain (service: crowkit-mcp)" : "export as env vars in shell profile"}
+  API keys:   ${IS_MAC ? "macOS Keychain" : IS_LINUX ? "GNOME Keyring" : IS_WIN ? "Credential Manager" : "env vars"} (service: crowkit-mcp)
 
   Next steps:
   1. Add a git remote:  cd ${wikiPath} && git remote add origin <your-repo-url> && git push -u origin main
