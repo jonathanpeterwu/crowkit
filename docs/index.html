@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>crowkit — Portable LLM Wiki + Claude Code Harness</title>
+  <meta name="description" content="One command sets up a Karpathy-style knowledge base with iCloud sync, Keychain secrets, and MCP server config that travels across machines.">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #e5e5e5;
+      --muted: #737373;
+      --accent: #a78bfa;
+      --accent2: #818cf8;
+      --surface: #171717;
+      --border: #262626;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+    }
+
+    .hero-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .tagline {
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .install-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 18px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .install-box:hover {
+      border-color: var(--accent);
+    }
+
+    .install-box .dollar {
+      color: var(--muted);
+      user-select: none;
+    }
+
+    .install-box .cmd {
+      color: var(--accent);
+    }
+
+    .install-box .copy {
+      color: var(--muted);
+      font-size: 14px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .install-box .copy:hover {
+      color: var(--fg);
+    }
+
+    /* Features */
+    .features {
+      padding: 60px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* How it works */
+    .how {
+      padding: 60px 0;
+    }
+
+    .how h2 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .layers {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .layer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .layer .icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .layer h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .layer .owner {
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .layer p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Sync table */
+    .sync {
+      padding: 60px 0;
+    }
+
+    .sync h2 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* CTA */
+    .cta {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .cta p {
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg);
+      padding: 12px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      margin-left: 12px;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--muted);
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 36px; }
+      .features { grid-template-columns: 1fr; }
+      .layers { grid-template-columns: 1fr; }
+      .hero { padding: 80px 0 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <section class="hero">
+      <span class="hero-icon">&#x1F426;&#x200D;&#x2B1B;</span>
+      <h1>crowkit</h1>
+      <p class="tagline">Portable LLM wiki + Claude Code harness that travels across machines.</p>
+      <div class="install-box" onclick="navigator.clipboard.writeText('npx crowkit')">
+        <span class="dollar">$</span>
+        <span class="cmd">npx crowkit</span>
+        <button class="copy" title="Copy">&#x2398;</button>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="feature">
+        <h3>&#x1F50D; Auth Preflight</h3>
+        <p>Checks GitHub CLI, npm, Claude Code, and git config. Tells you exactly what's missing before you start.</p>
+      </div>
+      <div class="feature">
+        <h3>&#x1F4DA; Karpathy Wiki</h3>
+        <p>Three-layer knowledge base: raw sources you drop in, wiki pages the LLM maintains, and generated outputs.</p>
+      </div>
+      <div class="feature">
+        <h3>&#x2601;&#xFE0F; iCloud Sync</h3>
+        <p>CLAUDE.md and slash commands sync via iCloud Drive. Git handles wiki content. Zero manual copying.</p>
+      </div>
+      <div class="feature">
+        <h3>&#x1F510; Keychain Secrets</h3>
+        <p>MCP server API keys stored in macOS Keychain. Syncs via iCloud Keychain. Never in plain text files.</p>
+      </div>
+      <div class="feature">
+        <h3>&#x1F916; MCP Servers</h3>
+        <p>Interactive setup for MCP servers. Adds them to Claude Code config with secure credential handling.</p>
+      </div>
+      <div class="feature">
+        <h3>&#x26A1; One Command</h3>
+        <p>Run <code>npx crowkit</code> on a new machine. It detects existing state and only fills in what's missing.</p>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>The Karpathy Pattern</h2>
+      <div class="layers">
+        <div class="layer">
+          <div class="icon">&#x1F4C4;</div>
+          <h4>raw/</h4>
+          <div class="owner">You own this</div>
+          <p>Articles, notes, screenshots, PDFs. Immutable inputs the LLM reads.</p>
+        </div>
+        <div class="layer">
+          <div class="icon">&#x1F4D6;</div>
+          <h4>pages/</h4>
+          <div class="owner">LLM owns this</div>
+          <p>Wiki pages created, updated, and cross-linked by Claude Code.</p>
+        </div>
+        <div class="layer">
+          <div class="icon">&#x1F4CA;</div>
+          <h4>outputs/</h4>
+          <div class="owner">LLM owns this</div>
+          <p>Reports, answers, and analysis generated from queries.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sync">
+      <h2>Sync Across Machines</h2>
+      <table>
+        <thead>
+          <tr><th>Thing</th><th>First Mac</th><th>Second Mac</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Wiki content</td><td><code>git push</code></td><td><code>git clone</code></td></tr>
+          <tr><td>CLAUDE.md + commands</td><td>auto (iCloud)</td><td><code>npx crowkit</code> to symlink</td></tr>
+          <tr><td>API keys</td><td>auto (Keychain)</td><td>auto (iCloud Keychain)</td></tr>
+          <tr><td>MCP servers</td><td>crowkit adds them</td><td><code>npx crowkit</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="cta">
+      <h2>Get started in 30 seconds</h2>
+      <p>Works with Claude Code on any Mac. Linux support for wiki + local config.</p>
+      <a href="https://github.com/jonathanpeterwu/crowkit" class="btn">GitHub</a>
+      <a href="https://www.npmjs.com/package/crowkit" class="btn btn-ghost">npm</a>
+    </section>
+  </div>
+
+  <footer>
+    <div class="container">
+      MIT + Commons Clause &middot; Made by <a href="https://github.com/jonathanpeterwu">Jonathan Wu</a>
+    </div>
+  </footer>
+
+</body>
+</html>
