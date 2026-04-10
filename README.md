@@ -15,7 +15,7 @@ npx crowkit
 1. **Auth preflight** — checks GitHub CLI, npm, Claude Code, git config and tells you what's missing
 2. Creates a three-layer wiki directory (`raw/`, `pages/`, `outputs/`)
 3. Generates a `CLAUDE.md` schema that turns Claude Code into a wiki operator
-4. Installs a `/next` slash command for reviewing what needs attention
+4. Installs `/next`, `/ingest`, `/lint` skills for wiki operations
 5. Optionally syncs config via iCloud Drive across Macs
 6. **MCP server setup** — adds MCP servers and stores API keys in macOS Keychain
 7. Initializes a git repo for the wiki content
@@ -32,12 +32,34 @@ Three layers:
 
 The `CLAUDE.md` schema tells Claude Code how to ingest sources, write pages, cross-link aggressively, and maintain the wiki over time.
 
+## Skills
+
+Crowkit installs three skills into `~/.claude/skills/`:
+
+| Skill | What it does |
+|-------|-------------|
+| `/next` | Punch list: unprocessed sources, lint issues, uncommitted git work |
+| `/ingest` | Process new raw sources into wiki pages with cross-linking |
+| `/lint` | Health-check: orphans, dead links, stale pages, missing frontmatter |
+
+### Skill Scopes
+
+Skills can live at three levels. Crowkit installs at the user level so they're available everywhere.
+
+| Scope | Path | Reaches |
+|-------|------|---------|
+| **Project** | `.claude/skills/` (in repo) | This repo only |
+| **User** | `~/.claude/skills/` | All repos, this machine |
+| **Cloud** (v1.0) | `crowkit sync` | All repos, all machines |
+
+Project skills override user skills with the same name. Add a `.claude/skills/crowkit-next/SKILL.md` to any repo to customize `/next` for that project.
+
 ## Sync Strategy
 
 | What | Synced via | Why |
 |------|-----------|-----|
 | Wiki content (`~/wiki/`) | **Git** | Version history, diffs, collaboration |
-| Claude config (`CLAUDE.md`, commands) | **iCloud** | Auto-syncs across Macs, no commits needed |
+| Claude config + skills | **iCloud** | Auto-syncs across Macs, no commits needed |
 
 On non-Mac systems, config files are written locally. Copy them manually or use a dotfiles repo.
 

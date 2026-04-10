@@ -363,8 +363,30 @@ async function main() {
     await setupMcpKeys();
   }
 
-  // ── Step 8: Initial commit ──
-  heading("Step 8: Git Commit");
+  // ── Step 8: Optional tools ──
+  heading("Step 8: Optional Tools");
+
+  // GitButler
+  if (cmd("which gitbutler-cli") || cmd("which gitbutler")) {
+    log("GitButler detected — virtual branches work well for separating wiki changes from code");
+  } else {
+    const installGb = await ask("Install GitButler for virtual branch management? (y/n)", "n");
+    if (installGb.toLowerCase() === "y") {
+      if (IS_MAC) {
+        try {
+          execSync("brew install --cask gitbutler", { stdio: "inherit" });
+          log("GitButler installed");
+        } catch {
+          warn("Could not install GitButler. Get it at https://gitbutler.com");
+        }
+      } else {
+        console.log("    Download: https://gitbutler.com");
+      }
+    }
+  }
+
+  // ── Step 9: Initial commit ──
+  heading("Step 9: Git Commit");
   try {
     execSync("git add -A", { cwd: wikiPath, stdio: "pipe" });
     const status = execSync("git status --porcelain", { cwd: wikiPath, encoding: "utf-8" });
